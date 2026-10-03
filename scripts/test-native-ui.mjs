@@ -53,7 +53,7 @@ try {
   }
   assert.ok(browser, 'WebView2 debugging endpoint did not become ready');
   page = browser.contexts()[0].pages()[0];
-  await page.getByRole('heading', { name: 'Bring debugging closer.' }).waitFor();
+  await page.getByRole('heading', { name: 'Share your workspace' }).waitFor();
   const errors = [];
   page.on('pageerror', (error) => errors.push(error.message));
   assert.equal(await page.getByText('Browser preview', { exact: false }).count(), 0);
@@ -67,6 +67,15 @@ try {
   const invitation = JSON.parse(await page.getByLabel('Invitation JSON').inputValue());
   base = invitation.url;
   assert.equal((await request('/health')).body.service, 'tether');
+  const updateGuard = await page.evaluate(async () => {
+    try {
+      await window.__TAURI_INTERNALS__.invoke('begin_update');
+      return 'unsafe';
+    } catch (error) {
+      return String(error);
+    }
+  });
+  assert.match(updateGuard, /Stop sharing and disconnect/);
   const receipt = await request('/v1/pair', 'POST', {
     invite: invitation.invite,
     operator: 'Native UI verification',
@@ -107,10 +116,37 @@ try {
   assert.match(result.result.stdout, /native-desktop-ok/);
   await page.getByRole('button', { name: 'End access', exact: true }).click();
   assert.equal((await request('/v1/session', 'GET', undefined, token)).status, 401);
+  await page.getByRole('button', { name: 'New invitation', exact: true }).click();
+  const terminalInvitation = await page.getByLabel('Invitation JSON').inputValue();
+  await page.getByRole('button', { name: 'Connect to a device', exact: true }).click();
+  await page.getByLabel('Invitation from the host').fill(terminalInvitation);
+  await page.getByLabel('Your name').fill('Native terminal verification');
+  await page.getByRole('button', { name: 'Request access', exact: true }).click();
+  await page.getByText('Waiting for the host to approve your request', { exact: true }).waitFor();
+  await page.getByRole('button', { name: 'Share this device', exact: true }).click();
+  await page.getByRole('button', { name: 'Approve access', exact: true }).click();
+  await page.getByRole('button', { name: 'Connect to a device', exact: true }).click();
+  await expect(page.getByRole('button', { name: 'Open shell', exact: true })).toBeEnabled();
+  await page.getByRole('button', { name: 'Open shell', exact: true }).click();
+  await page.getByText('Shell connected', { exact: true }).waitFor();
+  await page
+    .locator('.xterm-helper-textarea')
+    .pressSequentially("Write-Output ('native-pty-' + 'verified')", { delay: 5 });
+  await page.locator('.xterm-helper-textarea').press('Enter');
+  await expect
+    .poll(() => page.locator('.xterm-screen').textContent())
+    .toContain('native-pty-verified');
+  await page.getByRole('button', { name: 'Share this device', exact: true }).click();
+  await page.getByRole('button', { name: 'End access', exact: true }).click();
   await page.getByRole('button', { name: 'Stop sharing', exact: true }).click();
   await page.getByRole('button', { name: 'Start sharing', exact: true }).waitFor();
   await assert.rejects(() => request('/health'));
   base = undefined;
+  await page.evaluate(async () => {
+    await window.__TAURI_INTERNALS__.invoke('disconnect_remote');
+    await window.__TAURI_INTERNALS__.invoke('begin_update');
+    await window.__TAURI_INTERNALS__.invoke('cancel_update');
+  });
   await page.getByRole('button', { name: 'Agent access', exact: true }).click();
   assert.ok((await page.locator('pre').first().textContent()).includes('tether.exe'));
   const scrollBefore = await page.evaluate(() => window.scrollY);
@@ -124,7 +160,7 @@ try {
   await page.getByRole('button', { name: 'Copied prompt', exact: true }).waitFor();
   assert.deepEqual(errors, []);
   console.log(
-    'Native desktop passed: IPC, host consent, local approval, real command, revocation, shutdown, and MCP prompt clipboard.',
+    'Native desktop passed: IPC, host approval, real command, xterm PTY roundtrip, revocation, shutdown, and MCP prompt clipboard.',
   );
 } finally {
   if (page && base) {

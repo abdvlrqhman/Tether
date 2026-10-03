@@ -3,5 +3,5 @@
   "identifier": "main-window",
   "description": "Local Tether UI only. No remote web content or generic shell permissions.",
   "windows": ["main"],
-  "permissions": ["core:default"]
+  "permissions": ["core:default", "updater:default", "process:allow-restart"]
 }

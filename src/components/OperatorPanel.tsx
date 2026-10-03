@@ -20,9 +20,8 @@ export function OperatorPanel({
   return (
     <>
       <section className="section-heading">
-        <div className="eyebrow">OPERATOR WORKSPACE</div>
-        <h1>A terminal, wherever they are.</h1>
-        <p>Connect to a shared device and work in its native shell.</p>
+        <h1>Connect to a workspace</h1>
+        <p>Paste the host’s invitation. Your terminal opens after they approve access.</p>
       </section>
       <section className="connect-panel">
         <div className="panel-heading">

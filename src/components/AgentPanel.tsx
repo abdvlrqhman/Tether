@@ -34,9 +34,8 @@ export function AgentPanel({
   return (
     <>
       <section className="section-heading">
-        <div className="eyebrow">AGENT ACCESS</div>
-        <h1>The same access. A different operator.</h1>
-        <p>Connect your agent through MCP or the command line, with the host’s approval.</p>
+        <h1>Connect your AI agent</h1>
+        <p>Add Tether to your MCP client, then give your agent the prompt below.</p>
       </section>
       <section className="docs-panel">
         <div className="panel-heading">

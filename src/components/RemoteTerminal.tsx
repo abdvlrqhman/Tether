@@ -170,7 +170,7 @@ export function RemoteTerminal({
         {status === 'idle' && (
           <div className="terminal-empty">
             <TerminalWindow size={36} weight="light" />
-            <h3>Your remote workspace starts here.</h3>
+            <h3>No device connected</h3>
             <p>
               Connect to a device, get the host’s approval,
               <br />

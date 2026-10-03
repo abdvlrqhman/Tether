@@ -22,6 +22,7 @@ struct Desktop {
     runtime: Mutex<Option<Runtime>>,
     home: String,
     audit_path: String,
+    updating: std::sync::atomic::AtomicBool,
 }
 #[derive(serde::Serialize)]
 struct Overview {
@@ -59,6 +60,9 @@ async fn start_host(
             "cloudflared"
         });
     let mut runtime = state.runtime.lock().await;
+    if state.updating.load(std::sync::atomic::Ordering::SeqCst) {
+        return Err("An update is being installed. Restart Tether before sharing.".into());
+    }
     if runtime.is_some() {
         return Err("Already sharing this device".into());
     }
@@ -154,6 +158,10 @@ async fn connect_remote(
     invitation: String,
     operator: String,
 ) -> Result<RemoteView, String> {
+    let _runtime = state.runtime.lock().await;
+    if state.updating.load(std::sync::atomic::Ordering::SeqCst) {
+        return Err("An update is being installed. Restart Tether before connecting.".into());
+    }
     state.remote.begin(invitation, operator).await
 }
 #[tauri::command]
@@ -195,8 +203,28 @@ fn close_terminal(state: State<Desktop>) {
     state.remote.close_terminal();
 }
 
+#[tauri::command]
+async fn begin_update(state: State<'_, Desktop>) -> Result<(), String> {
+    let runtime = state.runtime.lock().await;
+    if runtime.is_some() || matches!(state.remote.view().status.as_str(), "pending" | "connected") {
+        return Err("Stop sharing and disconnect from devices before installing an update.".into());
+    }
+    state
+        .updating
+        .store(true, std::sync::atomic::Ordering::SeqCst);
+    Ok(())
+}
+#[tauri::command]
+fn cancel_update(state: State<Desktop>) {
+    state
+        .updating
+        .store(false, std::sync::atomic::Ordering::SeqCst);
+}
+
 pub fn run() {
     tauri::Builder::default()
+        .plugin(tauri_plugin_updater::Builder::new().build())
+        .plugin(tauri_plugin_process::init())
         .setup(|app| {
             let audit_path = app.path().app_local_data_dir()?.join("audit.jsonl");
             let audit = JsonlAudit::open(&audit_path).map_err(std::io::Error::other)?;
@@ -221,6 +249,7 @@ pub fn run() {
                 runtime: Mutex::new(None),
                 home,
                 audit_path: audit_path.to_string_lossy().into_owned(),
+                updating: std::sync::atomic::AtomicBool::new(false),
             });
             Ok(())
         })
@@ -237,7 +266,9 @@ pub fn run() {
             disconnect_remote,
             open_terminal,
             terminal_send,
-            close_terminal
+            close_terminal,
+            begin_update,
+            cancel_update
         ])
         .build(tauri::generate_context!())
         .expect("Tether could not start")

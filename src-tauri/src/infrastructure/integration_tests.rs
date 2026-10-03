@@ -117,7 +117,7 @@ async fn real_quick_tunnel_reaches_authenticated_host() {
                     Ok(response) => {
                         last_error = format!("Public health returned {}", response.status())
                     }
-                    Err(error) => last_error = format!("Public health request failed: {error}"),
+                    Err(error) => last_error = format!("Public health request failed: {error:?}"),
                 }
             } else if let Some(error) = snapshot.error {
                 last_error = error;

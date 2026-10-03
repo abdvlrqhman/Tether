@@ -19,16 +19,16 @@ try {
   });
   await mkdir('docs/images', { recursive: true });
   await page.goto('http://127.0.0.1:1421');
-  await expect(page.getByRole('heading', { name: 'Bring debugging closer.' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Share your workspace' })).toBeVisible();
   await page.getByLabel('Starting folder').fill('C:\\Projects\\Client');
-  await page.getByRole('heading', { name: 'Bring debugging closer.' }).click();
+  await page.getByRole('heading', { name: 'Share your workspace' }).click();
   await page.screenshot({
     path: 'docs/images/host-workspace.png',
     fullPage: true,
     animations: 'disabled',
   });
   await page.getByRole('button', { name: 'Connect to a device', exact: true }).click();
-  await expect(page.getByRole('heading', { name: 'A terminal, wherever they are.' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Connect to a workspace' })).toBeVisible();
   await page.screenshot({
     path: 'docs/images/operator-workspace.png',
     fullPage: true,
@@ -41,7 +41,14 @@ try {
     fullPage: true,
     animations: 'disabled',
   });
-  console.log('Captured host, operator, and MCP interface previews in docs/images.');
+  await page.getByRole('button', { name: 'Software updates', exact: true }).click();
+  await expect(page.getByRole('heading', { name: 'Software updates', exact: true })).toBeVisible();
+  await page.screenshot({
+    path: 'docs/images/settings.png',
+    fullPage: true,
+    animations: 'disabled',
+  });
+  console.log('Captured host, operator, MCP, and settings interface previews in docs/images.');
 } finally {
   await browser?.close();
   await server.close();

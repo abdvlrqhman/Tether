@@ -34,7 +34,7 @@ The same **Tauri 2 + Rust + React** app acts as host and operator. A bundled **T
 | Local audit trail           | Access and process lifecycle metadata, without recording commands or terminal contents |
 | Clean architecture          | Domain policy, application use cases, ports, adapters, and thin presentation layers    |
 
-**Current scope:** attended terminal debugging. Screen sharing, mouse control, unattended services, elevation, and automatic updates are future work.
+**Current scope:** attended terminal debugging, with manual checks and signed in-app updates. Screen sharing, mouse control, unattended services, and elevation are future work.
 
 ## See the workspaces
 
@@ -58,7 +58,7 @@ These are captures of the actual interface in browser preview mode, with no acti
 
 ### Get an installer
 
-Maintainers can run **[Actions → Build installers](https://github.com/abdvlrqhman/Tether/actions/workflows/installers.yml)** and download the platform artifact from the completed run. Version tags prepare **draft releases**; reviewed, published releases appear on the [Releases page](https://github.com/abdvlrqhman/Tether/releases).
+Download your installer from **[the latest release](https://github.com/abdvlrqhman/Tether/releases/latest)**. Version tags publish cross-platform installers after every platform passes checks, packaging, packaged MCP verification, and checksum validation. Maintainers can also run **[Actions → Build installers](https://github.com/abdvlrqhman/Tether/actions/workflows/installers.yml)** for build artifacts without publishing.
 
 | Platform            | Installer workflow output |
 | ------------------- | ------------------------- |
@@ -67,7 +67,15 @@ Maintainers can run **[Actions → Build installers](https://github.com/abdvlrqh
 | macOS Intel         | `.dmg` containing the app |
 | Linux x64           | `.deb` and `.AppImage`    |
 
-Every installer artifact includes a SHA-256 checksum file. The current packaging workflows produce unsigned development builds. Signing/notarization and native desktop validation are required before trusted customer distribution. Linux arm64 has a verified sidecar target for source builds; it is outside the installer matrix.
+Every platform includes SHA-256 checksums. Update packages are cryptographically signed; Windows publisher signing and Apple notarization are not configured, so the initial installers may show operating-system prompts. Linux arm64 has a verified sidecar target for source builds; it is outside the installer matrix.
+
+### Check for updates
+
+Open **Settings → Check for updates**, or use the download icon in the top bar. Tether shows the installed version, available release notes, and download progress. Choose **Install update** when ready; sharing and remote connections must be stopped first. Windows restarts through its installer; macOS and Linux show **Restart Tether** after installation. Linux in-app installation requires the **AppImage** build; `.deb` users download a new installer from Releases.
+
+Updates use `latest.json` from the latest stable GitHub release and verify the package against the public key bundled into Tether. There are no silent installations. Prereleases do not replace the stable update channel.
+
+![Tether settings with installed version and manual update controls](docs/images/settings.png)
 
 ### Start a debugging session
 
@@ -81,7 +89,7 @@ For testing on one machine, choose **Local only** and switch between both roles.
 
 ### Run from source
 
-Install **Node.js 22+**, **Rust 1.95+**, and the [Tauri platform prerequisites](https://v2.tauri.app/start/prerequisites/): Visual Studio C++ Build Tools/WebView2 on Windows, Xcode Command Line Tools on macOS, or WebKitGTK 4.1 and the listed Linux system packages.
+Install **Node.js 22.12+**, **Rust 1.95+**, and the [Tauri platform prerequisites](https://v2.tauri.app/start/prerequisites/): Visual Studio C++ Build Tools/WebView2 on Windows, Xcode Command Line Tools on macOS, or WebKitGTK 4.1 and the listed Linux system packages.
 
 ```sh
 git clone https://github.com/abdvlrqhman/Tether.git
@@ -209,21 +217,21 @@ Audit files contain access and process lifecycle metadata, never invitation/sess
 
 ## Workflows for the next change
 
-| Workflow                  | Trigger                                      | Outcome                                                                       |
-| ------------------------- | -------------------------------------------- | ----------------------------------------------------------------------------- |
-| **Checks**                | Pull requests, pushes to `main`, manual runs | Version/format/build checks, Clippy, Rust/CLI/UI tests on four native targets |
-| **Build installers**      | Manual dispatch                              | The same checks, native installers, packaged MCP verification, SHA-256 files  |
-| **Prepare draft release** | Pushed `v*` tag                              | Matching-version validation, checked installers, and a GitHub draft release   |
-| **Dependabot**            | Weekly                                       | Reviewable npm, Cargo, and pinned GitHub Actions updates                      |
+| Workflow             | Trigger                                      | Outcome                                                                        |
+| -------------------- | -------------------------------------------- | ------------------------------------------------------------------------------ |
+| **Checks**           | Pull requests, pushes to `main`, manual runs | Version/format/build checks, Clippy, Rust/CLI/UI tests on four native targets  |
+| **Build installers** | Manual dispatch                              | The same checks, native installers, packaged MCP verification, SHA-256 files   |
+| **Publish release**  | Pushed `v*` tag or manual existing-tag run   | Checked installers, signed update packages, checksums, and a published release |
+| **Dependabot**       | Weekly                                       | Reviewable npm, Cargo, and pinned GitHub Actions updates                       |
 
-Actions are pinned by SHA. Verification uses read-only repository permissions, bounded job timeouts, and caches. Release-write access belongs only to the final draft job. No workflow automatically publishes a release. PR/issue templates and a stable **Required checks** status are included for future development.
+Actions are pinned by SHA. Verification uses read-only repository permissions, bounded job timeouts, and caches. Release-write access belongs only to the final publish job. Main requires a pull request and **Required checks**, resolves conversations before merging, and blocks force pushes and deletion, including for administrators. Dependabot groups related frontend, Rust, and Actions updates so major-version migrations can be tested together.
 
 ```sh
 # Build all installer artifacts from main:
 gh workflow run installers.yml --ref main
 
-# Build locally:
-npm run tauri build
+# Build locally without generating release update packages:
+npm run tauri build -- --config '{"bundle":{"createUpdaterArtifacts":false}}'
 ```
 
 Local verification:
@@ -248,7 +256,7 @@ See **[development, versioning, artifacts, signing, and releases](docs/RELEASING
 
 ## What's next
 
-Future work includes managed tunnel providers, stronger operator identity, end-to-end relay encryption, separately approved screen/control capabilities, signed release distribution, and an eventual open-source license decision. These capabilities are not included in the initial terminal release.
+Future work includes managed tunnel providers, stronger operator identity, end-to-end relay encryption, separately approved screen/control capabilities, Windows publisher signing/Apple notarization, and an eventual open-source license decision. These capabilities are not included in the initial terminal release.
 
 ## Built by Spacie
 
