@@ -1,0 +1,14 @@
+node_modules/
+dist/
+src-tauri/target/
+src-tauri/gen/
+*.log
+.env*
+.DS_Store
+*.session.json
+artifacts/
+test-results/
+playwright-report/
+*.tsbuildinfo
+src-tauri/binaries/*
+!src-tauri/binaries/.gitkeep

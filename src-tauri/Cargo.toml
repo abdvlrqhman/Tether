@@ -1,0 +1,49 @@
+[package]
+name = "tether"
+version = "0.1.0"
+description = "Host-approved remote debugging for people and agents"
+authors = ["Spacie"]
+homepage = "https://spacie.net/"
+edition = "2021"
+rust-version = "1.95"
+
+[lib]
+name = "tether_lib"
+crate-type = ["staticlib", "cdylib", "rlib"]
+
+[features]
+default = ["desktop"]
+desktop = ["dep:tauri"]
+
+[build-dependencies]
+tauri-build = { version = "2", features = [] }
+
+[dependencies]
+tauri = { version = "2", features = [], optional=true }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+tokio = { version = "1", features = ["full"] }
+axum = { version = "0.8", features = ["ws"] }
+reqwest = { version = "0.12", default-features = false, features = ["json", "rustls-tls"] }
+tokio-tungstenite = { version = "0.28", features = ["rustls-tls-native-roots"] }
+futures-util = "0.3"
+portable-pty = "0.9"
+rand = "0.8"
+sha2 = "0.10"
+subtle = "2"
+base64 = "0.22"
+url = "2"
+libc = "0.2"
+rmcp = {version="3",features= ["server", "transport-io"] }
+
+[dev-dependencies]
+rmcp = {version="3",features= ["client"] }
+tempfile = "3"
+
+[target.'cfg(windows)'.dependencies]
+windows-sys = {version="0.61",features= ["Win32_Foundation", "Win32_System_JobObjects", "Win32_System_Threading", "Win32_Security"] }
+
+[[bin]]
+name = "tether"
+path = "src/main.rs"
+required-features = ["desktop"]

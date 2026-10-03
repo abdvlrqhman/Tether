@@ -1,0 +1,45 @@
+{
+  "name": "spacie-tether",
+  "version": "0.1.0",
+  "private": true,
+  "license": "UNLICENSED",
+  "author": "Spacie <https://spacie.net/>",
+  "homepage": "https://spacie.net/",
+  "type": "module",
+  "scripts": {
+    "dev": "vite --host 127.0.0.1 --port 1420 --strictPort",
+    "prepare:sidecar": "node scripts/prepare-cloudflared.mjs",
+    "build": "tsc -b && vite build",
+    "preview": "vite preview --host 127.0.0.1",
+    "tauri": "tauri",
+    "test": "node --test tests/*.test.mjs",
+    "test:ui": "playwright test",
+    "test:native-mcp": "node scripts/test-native-mcp.mjs",
+    "test:native-ui": "node scripts/test-native-ui.mjs",
+    "check:version": "node scripts/check-version.mjs",
+    "docs:screenshots": "node scripts/capture-docs.mjs",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "check": "npm run build && npm test && cargo test --manifest-path src-tauri/Cargo.toml",
+    "agent": "node agent/tether.mjs"
+  },
+  "dependencies": {
+    "@phosphor-icons/react": "^2.1.0",
+    "@tauri-apps/api": "^2.0.0",
+    "@xterm/addon-fit": "^0.10.0",
+    "@xterm/xterm": "^5.5.0",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "ws": "^8.18.0"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.63.0",
+    "@tauri-apps/cli": "^2.0.0",
+    "@types/react": "^19.0.0",
+    "@types/react-dom": "^19.0.0",
+    "@vitejs/plugin-react": "^4.3.0",
+    "prettier": "^3.9.9",
+    "typescript": "^5.7.0",
+    "vite": "^6.0.0"
+  }
+}

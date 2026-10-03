@@ -1,0 +1,30 @@
+name: Bug report
+description: Report a reproducible Tether issue
+body:
+  - type: markdown
+    attributes:
+      value: 'For security vulnerabilities, use the private reporting channel in SECURITY.md. Do not attach invitations, tokens, session files, or private client data.'
+  - type: input
+    id: environment
+    attributes:
+      label: Version and operating system
+      placeholder: Tether 0.1.0, Windows 11 x64
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Reproduction steps
+      description: Include the role, connection route, and steps needed to reproduce.
+    validations:
+      required: true
+  - type: textarea
+    id: behavior
+    attributes:
+      label: Expected and actual behavior
+    validations:
+      required: true
+  - type: textarea
+    id: diagnostics
+    attributes:
+      label: Sanitized diagnostics or screenshots

@@ -1,0 +1,16 @@
+name: Feature request
+description: Propose an improvement to remote debugging
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: What debugging problem should this solve?
+    validations:
+      required: true
+  - type: textarea
+    id: outcome
+    attributes:
+      label: Desired behavior
+      description: Describe the user flow and affected platforms.
+    validations:
+      required: true

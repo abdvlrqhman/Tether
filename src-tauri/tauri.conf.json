@@ -1,0 +1,42 @@
+{
+  "$schema": "https://schema.tauri.app/config/2",
+  "productName": "Tether",
+  "version": "0.1.0",
+  "identifier": "dev.spacie.tether",
+  "build": {
+    "beforeDevCommand": "npm run prepare:sidecar && npm run dev",
+    "devUrl": "http://127.0.0.1:1420",
+    "beforeBuildCommand": "npm run prepare:sidecar && npm run build",
+    "frontendDist": "../dist"
+  },
+  "app": {
+    "windows": [
+      {
+        "label": "main",
+        "title": "Tether · Spacie",
+        "width": 1280,
+        "height": 840,
+        "minWidth": 900,
+        "minHeight": 650
+      }
+    ],
+    "security": {
+      "csp": "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src ipc: http://ipc.localhost; object-src 'none'; base-uri 'self'; frame-src 'none'"
+    }
+  },
+  "bundle": {
+    "active": true,
+    "targets": "all",
+    "externalBin": ["binaries/cloudflared"],
+    "resources": {
+      "../NOTICE": "NOTICE",
+      "../licenses/CLOUDFLARED-LICENSE": "CLOUDFLARED-LICENSE"
+    },
+    "shortDescription": "Host-approved remote debugging by Spacie",
+    "category": "DeveloperTool",
+    "publisher": "Spacie",
+    "homepage": "https://spacie.net/",
+    "copyright": "Copyright © 2026 Spacie (spacie.net). All rights reserved.",
+    "icon": ["icons/icon.png", "icons/icon.ico", "icons/icon.icns"]
+  }
+}
