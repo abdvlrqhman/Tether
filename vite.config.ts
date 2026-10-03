@@ -12,11 +12,13 @@ export default defineConfig({
   envPrefix: ['VITE_', 'TAURI_ENV_'],
   build: {
     target: 'es2022',
-    rollupOptions: {
+    rolldownOptions: {
       output: {
-        manualChunks: {
-          terminal: ['@xterm/xterm', '@xterm/addon-fit'],
-          react: ['react', 'react-dom'],
+        codeSplitting: {
+          groups: [
+            { name: 'terminal', test: /node_modules[\\/]@xterm[\\/]/ },
+            { name: 'react', test: /node_modules[\\/](react|react-dom|scheduler)[\\/]/ },
+          ],
         },
       },
     },

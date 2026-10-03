@@ -12,23 +12,30 @@ async function files(directory) {
   for (const entry of await readdir(directory, { withFileTypes: true })) {
     const path = join(directory, entry.name);
     if (entry.isDirectory() && !entry.name.endsWith('.app')) result.push(...(await files(path)));
-    else if (entry.isFile() && /\.(exe|dmg|deb|AppImage)$/.test(entry.name)) result.push(path);
+    else if (entry.isFile() && /\.(exe|dmg|deb|AppImage|app\.tar\.gz)(\.sig)?$/.test(entry.name))
+      result.push(path);
   }
   return result.sort();
 }
 const installers = await files(source);
 const required = platform.startsWith('windows')
-  ? [/\.exe$/]
+  ? [/\.exe$/, /\.exe\.sig$/]
   : platform.startsWith('macos')
-    ? [/\.dmg$/]
-    : [/\.deb$/, /\.AppImage$/];
+    ? [/\.dmg$/, /\.app\.tar\.gz$/, /\.app\.tar\.gz\.sig$/]
+    : [/\.deb$/, /\.AppImage$/, /\.AppImage\.sig$/];
 for (const extension of required)
   if (!installers.some((file) => extension.test(file)))
     throw new Error(`Missing expected installer: ${extension}`);
 const names = new Set();
 const checksums = [];
 for (const path of installers) {
-  const name = basename(path);
+  // Tauri gives both macOS architectures the same archive name. Keep release assets distinct.
+  const version = JSON.parse(await readFile('package.json', 'utf8')).version;
+  const architecture = platform === 'macos-arm64' ? 'aarch64' : 'x64';
+  const name =
+    platform.startsWith('macos') && /\.app\.tar\.gz(\.sig)?$/.test(path)
+      ? `Tether_${version}_${architecture}.app.tar.gz${path.endsWith('.sig') ? '.sig' : ''}`
+      : basename(path);
   if (names.has(name)) throw new Error(`Installer filename collision: ${name}`);
   names.add(name);
   await copyFile(path, join(destination, name));

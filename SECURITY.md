@@ -29,6 +29,8 @@ Audit logs record approvals and process lifecycle, not terminal/command content.
 
 The sidecar download uses a pinned Cloudflare release and checked-in SHA-256 digests from official release metadata. Updating it requires reviewing the release, replacing version/digests, regenerating binaries, and rerunning native tests. Runtime automatic sidecar updates are disabled.
 
-Windows and Apple code signing/notarization must be configured with Spacie's own identities before trusted customer distribution. CI builds are artifacts, not a signed automatic update service. Test the native runtime on every platform you intend to support.
+Tether update packages are signed with a dedicated updater key. The public key is bundled into the app; the private key stays outside the repository and is supplied only to installer/release packaging through GitHub Secrets. The native updater verifies downloaded signatures before installation. Checks are manual, release notes are rendered as plain text, and installing requires no shared or connected session. A native guard blocks new host/operator connections during installation.
+
+Updater signatures do not replace Windows publisher signing or Apple code signing/notarization, which are not configured for these initial installers. Test the native desktop runtime on every platform you intend to support. Linux in-app installation requires an AppImage; Debian packages are updated through a new installer.
 
 Report issues privately to Spacie through its established support channel at [spacie.net](https://spacie.net/). Include the Tether version, OS, reproduction steps, and sanitized logs. Never include invitation secrets, session files, or client data in a public report.

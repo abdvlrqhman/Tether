@@ -9,7 +9,7 @@ pub mod shell;
 pub mod tunnel;
 use crate::application::ports::{Clock, SecretSource};
 use base64::{engine::general_purpose::URL_SAFE_NO_PAD, Engine};
-use rand::RngCore;
+use rand::TryRng;
 pub struct SystemClock;
 impl Clock for SystemClock {
     fn now(&self) -> u64 {
@@ -23,7 +23,9 @@ pub struct RandomSecrets;
 impl SecretSource for RandomSecrets {
     fn generate(&self) -> String {
         let mut bytes = [0u8; 32];
-        rand::rngs::OsRng.fill_bytes(&mut bytes);
+        rand::rngs::SysRng
+            .try_fill_bytes(&mut bytes)
+            .expect("Operating system random source unavailable");
         URL_SAFE_NO_PAD.encode(bytes)
     }
 }

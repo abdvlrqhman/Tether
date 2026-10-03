@@ -6,16 +6,16 @@ updates:
       interval: weekly
     open-pull-requests-limit: 5
     groups:
-      compatible-updates:
-        update-types: [minor, patch]
+      frontend:
+        patterns: ['*']
   - package-ecosystem: cargo
     directory: /src-tauri
     schedule:
       interval: weekly
     open-pull-requests-limit: 5
     groups:
-      compatible-updates:
-        update-types: [minor, patch]
+      rust:
+        patterns: ['*']
   - package-ecosystem: github-actions
     directory: /
     schedule:
