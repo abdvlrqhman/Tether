@@ -118,8 +118,8 @@ export function SettingsPanel({
           <p className="field-note">Update checks are available in the installed desktop app.</p>
         )}
         <p className="field-note">
-          Linux: in-app installation requires the AppImage build. Debian package users can download
-          the latest installer from Release history.
+          Linux updates keep your installation format. Debian updates may ask for administrator
+          authentication.
         </p>
         <div className="settings-note">
           <ShieldCheck size={19} />

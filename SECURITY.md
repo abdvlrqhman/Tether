@@ -31,6 +31,6 @@ The sidecar download uses a pinned Cloudflare release and checked-in SHA-256 dig
 
 Tether update packages are signed with a dedicated updater key. The public key is bundled into the app; the private key stays outside the repository and is supplied only to installer/release packaging through GitHub Secrets. The native updater verifies downloaded signatures before installation. Checks are manual, release notes are rendered as plain text, and installing requires no shared or connected session. A native guard blocks new host/operator connections during installation.
 
-Updater signatures do not replace Windows publisher signing or Apple code signing/notarization, which are not configured for these initial installers. Test the native desktop runtime on every platform you intend to support. Linux in-app installation requires an AppImage; Debian packages are updated through a new installer.
+Updater signatures do not replace Windows publisher signing or Apple code signing/notarization, which are not configured for these initial installers. Test the native desktop runtime on every platform you intend to support. Linux manifests distinguish AppImage and Debian packages; Debian installation can require administrator authentication through the operating system.
 
 Report issues privately to Spacie through its established support channel at [spacie.net](https://spacie.net/). Include the Tether version, OS, reproduction steps, and sanitized logs. Never include invitation secrets, session files, or client data in a public report.

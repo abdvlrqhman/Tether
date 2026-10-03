@@ -26,7 +26,7 @@ Each platform completes checks and tests its packaged MCP executable before uplo
 | Windows x64         | NSIS `.exe`         | The same `.exe` plus `.sig`                       |
 | macOS Apple Silicon | `.dmg`              | `Tether_<version>_aarch64.app.tar.gz` plus `.sig` |
 | macOS Intel         | `.dmg`              | `Tether_<version>_x64.app.tar.gz` plus `.sig`     |
-| Linux x64           | `.deb`, `.AppImage` | The `.AppImage` plus `.sig`                       |
+| Linux x64           | `.deb`, `.AppImage` | Both packages plus their `.sig` files             |
 
 macOS updater archives are renamed during collection to avoid architecture filename collisions. Checksums cover installers, update archives, and signature files. Manual installer builds publish no release or update manifest.
 
@@ -46,7 +46,7 @@ The original private key is stored outside this checkout at `%LOCALAPPDATA%\spac
 
 For a separate fork, generate your own key with `npm run tauri -- signer generate --write-keys <private-path>`, configure your own secret/public key, and change the GitHub endpoint. Do not reuse Spacie's release identity.
 
-Updater signatures authenticate packages within Tether. Windows publisher signing and Apple Developer ID signing/notarization are separate and are not configured for the initial installers. Their setup is described in Tauri's [Windows signing](https://v2.tauri.app/distribute/sign/windows/) and [macOS signing](https://v2.tauri.app/distribute/sign/macos/) guides. Linux in-app installation requires AppImage; `.deb` users install the new Debian package.
+Updater signatures authenticate packages within Tether. Windows publisher signing and Apple Developer ID signing/notarization are separate and are not configured for the initial installers. Their setup is described in Tauri's [Windows signing](https://v2.tauri.app/distribute/sign/windows/) and [macOS signing](https://v2.tauri.app/distribute/sign/macos/) guides. Linux metadata includes `linux-x86_64-appimage` and `linux-x86_64-deb`, which Tauri selects before the generic AppImage fallback. Debian installation may request administrator authentication.
 
 ## Publish a release
 
@@ -63,7 +63,7 @@ git push origin v0.2.0
 
 **Publish release** requires a matching version tag reachable from main. All four targets run the shared checks, build signed packages, and test their packaged MCP executables. The final job alone gets `contents: write`, verifies every checksum/signature file and platform, and generates `latest.json` with version, plain-text notes, date, URLs, and signatures for all four native updater targets.
 
-The job uploads sixteen assets to a temporary draft, verifies the uploaded inventory, then publishes it. A `-prerelease` tag creates a prerelease without replacing the stable latest channel. A failed build leaves no public partial release. An interrupted draft can be resumed; already published releases are left unchanged. The built-in GitHub token is used, and the workflow never invents a tag.
+The job uploads seventeen assets to a temporary draft, verifies the uploaded inventory, then publishes it. A `-prerelease` tag creates a prerelease without replacing the stable latest channel. A failed build leaves no public partial release. An interrupted draft can be resumed; already published releases are left unchanged. The built-in GitHub token is used, and the workflow never invents a tag.
 
 Retry an existing tag through Actions or:
 

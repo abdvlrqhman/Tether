@@ -71,7 +71,7 @@ Every platform includes SHA-256 checksums. Update packages are cryptographically
 
 ### Check for updates
 
-Open **Settings → Check for updates**, or use the download icon in the top bar. Tether shows the installed version, available release notes, and download progress. Choose **Install update** when ready; sharing and remote connections must be stopped first. Windows restarts through its installer; macOS and Linux show **Restart Tether** after installation. Linux in-app installation requires the **AppImage** build; `.deb` users download a new installer from Releases.
+Open **Settings → Check for updates**, or use the download icon in the top bar. Tether shows the installed version, available release notes, and download progress. Choose **Install update** when ready; sharing and remote connections must be stopped first. Windows restarts through its installer; macOS and Linux show **Restart Tether** after installation. Linux updates preserve the installed **AppImage** or **Debian** package format; Debian installation may request administrator authentication.
 
 Updates use `latest.json` from the latest stable GitHub release and verify the package against the public key bundled into Tether. There are no silent installations. Prereleases do not replace the stable update channel.
 

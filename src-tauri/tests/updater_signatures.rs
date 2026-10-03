@@ -33,7 +33,8 @@ fn packaged_updates_match_the_embedded_key_and_reject_tampering() {
         verified += 1;
     }
     assert_eq!(
-        verified, 1,
-        "Each platform must contain exactly one signed updater package"
+        verified,
+        if cfg!(target_os = "linux") { 2 } else { 1 },
+        "Every updater package expected for this platform must be signed"
     );
 }
