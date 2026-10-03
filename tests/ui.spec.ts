@@ -40,7 +40,7 @@ test('compact workspace does not overflow horizontally', async ({ page }) => {
 // Settings screen, and install/restart controls execute together.
 async function mockNative(
   page: import('@playwright/test').Page,
-  mode: 'current' | 'available' | 'sharing' | 'offline',
+  mode: 'current' | 'available' | 'sharing' | 'offline' | 'tampered',
 ) {
   await page.addInitScript((mode) => {
     const bridge = window as unknown as {
@@ -88,6 +88,7 @@ async function mockNative(
           };
         }
         if (name === 'plugin:updater|download') {
+          if (bridge.__updates.mode === 'tampered') throw new Error('Invalid update signature');
           args.onEvent?.onmessage({ event: 'Started', data: { contentLength: 100 } });
           args.onEvent?.onmessage({ event: 'Progress', data: { chunkLength: 60 } });
           return new Promise((resolve) => {
@@ -128,6 +129,24 @@ test('active sharing blocks update installation but allows checking release note
   await expect(
     page.getByText('Stop sharing and disconnect from devices before installing an update.'),
   ).toBeVisible();
+});
+test('failed package verification never reaches installation and allows a fresh check', async ({
+  page,
+}) => {
+  await mockNative(page, 'tampered');
+  await page.goto('/');
+  await page.getByRole('button', { name: 'Software updates', exact: true }).click();
+  await page.getByRole('button', { name: 'Check for updates', exact: true }).click();
+  await page.getByRole('button', { name: 'Install update', exact: true }).click();
+  await expect(page.getByRole('alert')).toContainText('Invalid update signature');
+  await expect(page.getByRole('button', { name: 'Install update', exact: true })).toHaveCount(0);
+  const calls = await page.evaluate(
+    () => (window as unknown as { __updates: { calls: string[] } }).__updates.calls,
+  );
+  expect(calls).not.toContain('begin_update');
+  expect(calls).not.toContain('plugin:updater|install');
+  await page.getByRole('button', { name: 'Check for updates', exact: true }).click();
+  await expect(page.getByRole('status')).toHaveText('Tether 0.2.0 is available');
 });
 test('updates expose download progress, validate idle state, install, and restart', async ({
   page,
