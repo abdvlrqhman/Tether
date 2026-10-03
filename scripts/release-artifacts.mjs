@@ -21,7 +21,7 @@ export const platforms = {
   },
   'linux-x64': {
     target: 'linux-x86_64',
-    extensions: [/amd64\.deb$/, /amd64\.AppImage$/, /amd64\.AppImage\.sig$/],
+    extensions: [/amd64\.deb$/, /amd64\.deb\.sig$/, /amd64\.AppImage$/, /amd64\.AppImage\.sig$/],
     update: /\.AppImage$/,
   },
 };
@@ -98,6 +98,14 @@ export async function createUpdateManifest(
       url: `https://github.com/${repository}/releases/download/${tag}/${encodeURIComponent(basename(asset))}`,
     };
   }
+  // Current Tauri selects the installer-specific entry before the generic fallback.
+  manifest.platforms['linux-x86_64-appimage'] = { ...manifest.platforms['linux-x86_64'] };
+  const deb = assets.find((path) => /amd64\.deb$/.test(path));
+  assert.ok(deb, 'Missing Debian updater package');
+  manifest.platforms['linux-x86_64-deb'] = {
+    signature: (await readFile(`${deb}.sig`, 'utf8')).trim(),
+    url: `https://github.com/${repository}/releases/download/${tag}/${encodeURIComponent(basename(deb))}`,
+  };
   await writeFile(join(directory, 'latest.json'), JSON.stringify(manifest, null, 2) + '\n');
   return manifest;
 }

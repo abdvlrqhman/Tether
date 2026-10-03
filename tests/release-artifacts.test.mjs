@@ -21,6 +21,7 @@ async function fixture() {
     ],
     'linux-x64': [
       'Tether_0.1.0_amd64.deb',
+      'Tether_0.1.0_amd64.deb.sig',
       'Tether_0.1.0_amd64.AppImage',
       'Tether_0.1.0_amd64.AppImage.sig',
     ],
@@ -40,7 +41,7 @@ async function fixture() {
 test('release requires every native installer with matching checksums', async () => {
   const dir = await fixture();
   try {
-    assert.equal((await verifyReleaseArtifacts(dir)).length, 15);
+    assert.equal((await verifyReleaseArtifacts(dir)).length, 16);
   } finally {
     await rm(dir, { recursive: true, force: true });
   }
@@ -60,6 +61,8 @@ test('updater metadata maps every architecture to its own signed package', async
       'darwin-aarch64',
       'darwin-x86_64',
       'linux-x86_64',
+      'linux-x86_64-appimage',
+      'linux-x86_64-deb',
       'windows-x86_64',
     ]);
     assert.match(
@@ -71,9 +74,15 @@ test('updater metadata maps every architecture to its own signed package', async
       /v0\.1\.0\/Tether_0\.1\.0_x64\.app\.tar\.gz$/,
     );
     assert.match(manifest.platforms['linux-x86_64'].url, /\.AppImage$/);
+    assert.match(manifest.platforms['linux-x86_64-appimage'].url, /\.AppImage$/);
+    assert.match(manifest.platforms['linux-x86_64-deb'].url, /\.deb$/);
+    assert.notEqual(
+      manifest.platforms['linux-x86_64-deb'].url,
+      manifest.platforms['linux-x86_64-appimage'].url,
+    );
     assert.match(manifest.platforms['windows-x86_64'].url, /\.exe$/);
     assert.ok(manifest.platforms['windows-x86_64'].signature.length > 100);
-    assert.equal((await verifyReleaseArtifacts(dir)).length, 16);
+    assert.equal((await verifyReleaseArtifacts(dir)).length, 17);
     await rm(join(dir, 'Tether_0.1.0_x64-setup.exe.sig'));
     await assert.rejects(
       () =>

@@ -1,6 +1,6 @@
 [package]
 name = "tether"
-version = "0.1.0"
+version = "0.1.1"
 description = "Host-approved remote debugging for people and agents"
 authors = ["Spacie"]
 homepage = "https://spacie.net/"
