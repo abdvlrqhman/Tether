@@ -63,10 +63,25 @@ try {
     clientInfo: { name: 'tether-native-test', version: '1' },
   });
   assert.equal(initialized.serverInfo.name, 'spacie-tether');
+  assert.equal(
+    initialized.serverInfo.version,
+    JSON.parse(await fs.readFile(new URL('../package.json', import.meta.url), 'utf8')).version,
+  );
   assert.ok(initialized.capabilities.tools);
   child.stdin.write('{"jsonrpc":"2.0","method":"notifications/initialized"}\n');
   const tools = await call('tools/list');
-  assert.equal(tools.tools.length, 7);
+  assert.deepEqual(tools.tools.map((tool) => tool.name).sort(), [
+    'tether_cancel_job',
+    'tether_exec',
+    'tether_job_status',
+    'tether_logout',
+    'tether_pair',
+    'tether_pair_status',
+    'tether_session_status',
+  ]);
+  for (const tool of tools.tools)
+    for (const hint of ['readOnlyHint', 'destructiveHint', 'idempotentHint', 'openWorldHint'])
+      assert.equal(typeof tool.annotations[hint], 'boolean', `${tool.name} ${hint}`);
   assert.equal(
     tools.tools.find((tool) => tool.name === 'tether_exec').annotations.destructiveHint,
     true,
@@ -75,6 +90,14 @@ try {
   assert.equal(status.isError, true);
   assert.ok(status.structuredContent.error);
   assert.equal(status.structuredContent.token, undefined);
+  const jobId = 'a'.repeat(43);
+  for (const name of ['tether_job_status', 'tether_cancel_job']) {
+    const job = await call('tools/call', { name, arguments: { job_id: jobId } });
+    assert.equal(job.isError, true, name);
+    assert.ok(job.structuredContent.error, name);
+  }
+  const logout = await call('tools/call', { name: 'tether_logout', arguments: {} });
+  assert.equal(logout.structuredContent.status, 'logged_out');
   const exit = once(child, 'exit');
   child.stdin.end();
   await Promise.race([

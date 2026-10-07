@@ -74,7 +74,7 @@ pub fn router(service: HostService) -> Router {
     Router::new()
         .route(
             "/health",
-            get(|| async { Json(json!({"service":"tether","version":"0.1.0"})) }),
+            get(|| async { Json(json!({"service":"tether","version":env!("CARGO_PKG_VERSION")})) }),
         )
         .route("/v1/pair", post(pair))
         .route("/v1/pair/{id}", get(pair_status))

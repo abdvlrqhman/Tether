@@ -37,6 +37,15 @@ async fn mcp_protocol_pair_command_and_logout() {
     let client = ().serve(client_io).await.unwrap();
     let tools = client.list_all_tools().await.unwrap();
     assert_eq!(tools.len(), 7);
+    assert!(tools
+        .iter()
+        .all(|t| t
+            .annotations
+            .as_ref()
+            .is_some_and(|a| a.read_only_hint.is_some()
+                && a.destructive_hint.is_some()
+                && a.idempotent_hint.is_some()
+                && a.open_world_hint.is_some())));
     assert!(tools.iter().any(|t| t.name == "tether_exec"
         && t.annotations.as_ref().and_then(|a| a.destructive_hint) == Some(true)));
     let before = client
